@@ -53,6 +53,12 @@ class EditViewController: NSViewController, NSTextViewDelegate {
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(subtitleLabel)
 
+        let bylineLabel = NSTextField(labelWithString: "A tool by Nikoloz Sharvashidze")
+        bylineLabel.font = NSFont.systemFont(ofSize: 11)
+        bylineLabel.textColor = NSColor(white: 0.30, alpha: 1)
+        bylineLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(bylineLabel)
+
         // ── Text area ─────────────────────────────────────────────────
         textScrollView = NSScrollView()
         textScrollView.hasVerticalScroller = true
@@ -138,6 +144,9 @@ class EditViewController: NSViewController, NSTextViewDelegate {
 
         // ── Constraints ───────────────────────────────────────────────
         NSLayoutConstraint.activate([
+            bylineLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 32),
+            bylineLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+
             iconLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 28),
             iconLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
 
