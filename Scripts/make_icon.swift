@@ -1,92 +1,64 @@
 #!/usr/bin/env swift
 import AppKit
 
-// Draws the Teleprompter app icon: dark bg, film-strip side bars, play triangle, text lines
+// Draws a flat, industrial broadcast-prompter mark.
 func makeIcon(size: CGFloat) -> NSImage {
     let img = NSImage(size: NSSize(width: size, height: size))
     img.lockFocus()
 
     let ctx = NSGraphicsContext.current!.cgContext
     let rect = CGRect(x: 0, y: 0, width: size, height: size)
-    let r = size * 0.13   // corner radius
+    let r = size * 0.16
+    let graphite = NSColor(red: 0.035, green: 0.043, blue: 0.047, alpha: 1).cgColor
+    let steel = NSColor(red: 0.12, green: 0.14, blue: 0.15, alpha: 1).cgColor
+    let bone = NSColor(red: 0.88, green: 0.89, blue: 0.87, alpha: 1).cgColor
+    let muted = NSColor(red: 0.43, green: 0.46, blue: 0.46, alpha: 1).cgColor
+    let tallyOrange = NSColor(red: 0.95, green: 0.29, blue: 0.09, alpha: 1).cgColor
 
-    // Background: deep navy
-    ctx.setFillColor(NSColor(red: 0.06, green: 0.07, blue: 0.13, alpha: 1).cgColor)
+    ctx.setFillColor(graphite)
     let bgPath = CGPath(roundedRect: rect, cornerWidth: r, cornerHeight: r, transform: nil)
     ctx.addPath(bgPath)
     ctx.fillPath()
 
-    let pad = size * 0.07
+    // Thin equipment frame.
+    let frame = CGRect(x: size * 0.09, y: size * 0.09, width: size * 0.82, height: size * 0.82)
+    ctx.setStrokeColor(steel)
+    ctx.setLineWidth(max(1, size * 0.012))
+    ctx.addPath(CGPath(roundedRect: frame, cornerWidth: size * 0.07, cornerHeight: size * 0.07, transform: nil))
+    ctx.strokePath()
 
-    // Film-strip left bar
-    ctx.setFillColor(NSColor(red: 0.14, green: 0.14, blue: 0.22, alpha: 1).cgColor)
-    ctx.fill(CGRect(x: pad, y: pad, width: size * 0.12, height: size - pad * 2))
-
-    // Film-strip right bar
-    ctx.fill(CGRect(x: size - pad - size * 0.12, y: pad, width: size * 0.12, height: size - pad * 2))
-
-    // Perforations (left)
-    ctx.setFillColor(NSColor(red: 0.06, green: 0.07, blue: 0.13, alpha: 1).cgColor)
-    let perfH = size * 0.07
-    let perfW = size * 0.07
-    let perfX = pad + size * 0.025
-    let perfCount = 5
-    let spacing = (size - pad * 2 - perfH) / CGFloat(perfCount - 1)
-    for i in 0..<perfCount {
-        let y = pad + CGFloat(i) * spacing
-        let pRect = CGRect(x: perfX, y: y, width: perfW, height: perfH)
-        ctx.fill(CGRect(
-            x: pRect.minX - 1, y: pRect.minY - 1,
-            width: pRect.width + 2, height: pRect.height + 2
-        ))
-        let prRect = CGRect(x: pRect.minX + 1, y: pRect.minY + 1, width: pRect.width - 2, height: pRect.height - 2)
-        ctx.fill(prRect)
-    }
-    // Perforations (right)
-    let perfXR = size - pad - size * 0.12 + size * 0.025
-    for i in 0..<perfCount {
-        let y = pad + CGFloat(i) * spacing
-        let prRect = CGRect(x: perfXR + 1, y: y + 1, width: perfW - 2, height: perfH - 2)
-        ctx.fill(prRect)
-    }
-
-    // Inner screen area
-    ctx.setFillColor(NSColor(red: 0.09, green: 0.09, blue: 0.15, alpha: 1).cgColor)
-    let innerX = pad + size * 0.12 + size * 0.03
-    let innerW = size - 2 * (pad + size * 0.12 + size * 0.03)
-    let innerY = pad + size * 0.06
-    let innerH = size - 2 * (pad + size * 0.06)
-    ctx.fill(CGRect(x: innerX, y: innerY, width: innerW, height: innerH))
-
-    // Play triangle (centered, slightly above middle)
-    let triCenter = CGPoint(x: size * 0.5, y: size * 0.52)
-    let triR = size * 0.14
-    ctx.setFillColor(NSColor(red: 0.15, green: 0.72, blue: 0.38, alpha: 1).cgColor)
-    let triPath = CGMutablePath()
-    triPath.move(to: CGPoint(x: triCenter.x - triR, y: triCenter.y - triR))
-    triPath.addLine(to: CGPoint(x: triCenter.x + triR * 1.1, y: triCenter.y))
-    triPath.addLine(to: CGPoint(x: triCenter.x - triR, y: triCenter.y + triR))
-    triPath.closeSubpath()
-    ctx.addPath(triPath)
+    // Prompter screen: a clipped, forward-facing trapezoid.
+    let prompterScreen = CGMutablePath()
+    prompterScreen.move(to: CGPoint(x: size * 0.25, y: size * 0.69))
+    prompterScreen.addLine(to: CGPoint(x: size * 0.75, y: size * 0.69))
+    prompterScreen.addLine(to: CGPoint(x: size * 0.69, y: size * 0.37))
+    prompterScreen.addLine(to: CGPoint(x: size * 0.31, y: size * 0.37))
+    prompterScreen.closeSubpath()
+    ctx.setFillColor(steel)
+    ctx.addPath(prompterScreen)
     ctx.fillPath()
+    ctx.setStrokeColor(bone)
+    ctx.setLineJoin(.miter)
+    ctx.setLineWidth(max(1.5, size * 0.027))
+    ctx.addPath(prompterScreen)
+    ctx.strokePath()
 
-    // Text lines below triangle (like script lines)
-    ctx.setFillColor(NSColor(white: 1, alpha: 0.18).cgColor)
-    let lineY1 = triCenter.y - triR * 2.8
-    let lineH  = size * 0.03
-    let lineX  = innerX + size * 0.04
-    ctx.fill(CGRect(x: lineX, y: lineY1, width: innerW * 0.80, height: lineH))
-    ctx.fill(CGRect(x: lineX, y: lineY1 - lineH * 2.2, width: innerW * 0.60, height: lineH))
+    // Three script lines remain readable even at 16px.
+    ctx.setFillColor(bone)
+    let lineHeight = max(1, size * 0.026)
+    ctx.fill(CGRect(x: size * 0.36, y: size * 0.59, width: size * 0.28, height: lineHeight))
+    ctx.fill(CGRect(x: size * 0.34, y: size * 0.52, width: size * 0.32, height: lineHeight))
+    ctx.setFillColor(muted)
+    ctx.fill(CGRect(x: size * 0.38, y: size * 0.45, width: size * 0.24, height: lineHeight))
 
-    ctx.setFillColor(NSColor(white: 1, alpha: 0.10).cgColor)
-    let lineY2 = triCenter.y - triR * 1.7
-    ctx.fill(CGRect(x: lineX, y: lineY2 - lineH * 2.2, width: innerW * 0.72, height: lineH))
+    // Low-profile broadcast mount.
+    ctx.setFillColor(bone)
+    ctx.fill(CGRect(x: size * 0.475, y: size * 0.25, width: size * 0.05, height: size * 0.12))
+    ctx.fill(CGRect(x: size * 0.35, y: size * 0.21, width: size * 0.30, height: size * 0.04))
 
-    // Small text lines below triangle
-    ctx.setFillColor(NSColor(white: 1, alpha: 0.14).cgColor)
-    let lineYB = triCenter.y - triR * 0.9
-    ctx.fill(CGRect(x: lineX, y: lineYB, width: innerW * 0.68, height: lineH))
-    ctx.fill(CGRect(x: lineX, y: lineYB - lineH * 2.2, width: innerW * 0.50, height: lineH))
+    // Tally light: the single controlled accent.
+    ctx.setFillColor(tallyOrange)
+    ctx.fillEllipse(in: CGRect(x: size * 0.70, y: size * 0.73, width: size * 0.065, height: size * 0.065))
 
     img.unlockFocus()
     return img
